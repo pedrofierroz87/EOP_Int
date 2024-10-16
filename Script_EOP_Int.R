@@ -16,6 +16,400 @@ library(purrr)
 
 
 #**************************************************************************************************************************/
+##########  EOP 2017  ##########################################################
+#**************************************************************************************************************************/
+
+#Import Data
+
+EOP2017 <- read_dta("EOP2017.dta")
+View(EOP2017)
+
+# Year
+EOP2017$year <- 2017
+
+# Weight
+
+EOP2017$weight <- EOP2017$PONDERADOR
+
+######## 2017 - SOCIODEMOGRAPHIC VARIABLES ########
+
+# Sex (NAs and create dummy =1 if women)
+
+EOP2017 <- EOP2017%>%
+  mutate(sex = ifelse(A05 == 2, 1,
+                      ifelse(A05 == 1, 0, NA)))
+table(EOP2017$A05)
+table(EOP2017$sex)
+
+# Age
+
+EOP2017$age <- EOP2017$A04
+summary(EOP2017$A04)
+summary(EOP2017$age)
+
+# Socioeconomic Status
+EOP2017$SES <- EOP2017$GSEREC
+table(EOP2017$GSEREC)
+table(EOP2017$SES)
+
+# recoding
+
+EOP2017 <- EOP2017 %>%
+  mutate(SES = case_when(
+    SES == 1 ~ 5,
+    SES == 2 ~ 4,
+    SES == 4 ~ 2,
+    SES == 5 ~ 1,
+    TRUE ~ SES  # This line keeps all other values as they are
+  ))
+
+table(EOP2017$SES)
+
+
+# Comunas
+
+EOP2017 <- EOP2017 %>%
+  mutate(
+    com1 = ifelse(S01 == 1, 1, 0),
+    com2 = ifelse(S01 == 2, 1, 0),
+    com3 = ifelse(S01 == 3, 1, 0),
+    com4 = ifelse(S01 == 4, 1, 0),
+    com5 = ifelse(S01 == 5, 1, 0),
+    com6 = ifelse(S01 == 6, 1, 0),
+    com7 = ifelse(S01 == 7, 1, 0),
+    com8 = ifelse(S01 == 8, 1, 0),
+    com9 = ifelse(S01 == 9, 1, 0),
+    com10 = ifelse(S01 == 10, 1, 0)
+  )
+
+# Living in the periphery
+
+EOP2017$periphery <- ifelse(EOP2017$S01 == 1 | EOP2017$S01 == 2 | EOP2017$S01 == 3 | EOP2017$S01 == 4 | EOP2017$S01 == 5 | EOP2017$S01 == 9 | EOP2017$S01 == 10, 1, 0)
+table(EOP2017$periphery)
+table(EOP2017$S01)
+
+# Internet Access
+
+table(EOP2017$Z06_T1)
+table(EOP2017$Z06_T2)
+table(EOP2017$Z06_T3)
+
+EOP2017 <- EOP2017%>%
+  mutate(inthome = ifelse(Z06_T1 == 1, 1,
+                          ifelse(Z06_T1 == 2, 0, NA)))
+EOP2017 <- EOP2017%>%
+  mutate(intmobile = ifelse(Z06_T2 == 1, 1,
+                            ifelse(Z06_T2 == 2, 0, NA)))
+EOP2017 <- EOP2017%>%
+  mutate(intwork = ifelse(Z06_T3 == 1, 1,
+                          ifelse(Z06_T3 == 2, 0, NA)))
+
+table(EOP2017$inthome)
+table(EOP2017$intmobile)
+table(EOP2017$intwork)
+
+######## 2017 - EVALUATION OF AUTHORITIES ########
+
+## Presidential Approval
+
+table(EOP2017$B01)
+EOP2017 <- EOP2017%>%
+  mutate(presapp = ifelse(EOP2017$B01 == 1, 1,
+                          ifelse(EOP2017$B01 == 99, NA, 0)))
+table (EOP2017$presapp)
+
+## Government Approval
+
+table(EOP2017$B02)
+EOP2017 <- EOP2017%>%
+  mutate(govapp = ifelse(EOP2017$B02 == 1, 1,
+                         ifelse(EOP2017$B02 == 99, NA, 0)))
+table(EOP2017$govapp)
+
+## Country Present
+
+table(EOP2017$B03)
+EOP2017 <- EOP2017%>%
+  mutate(progress = ifelse(EOP2017$B03 == 1, 1,
+                           ifelse(EOP2017$B03 == 99, NA, 0)))
+EOP2017 <- EOP2017%>%
+  mutate(stagnant = ifelse(EOP2017$B03 == 2, 1,
+                           ifelse(EOP2017$B03 == 99, NA, 0)))
+EOP2017 <- EOP2017%>%
+  mutate(decline = ifelse(EOP2017$B03 == 3, 1,
+                          ifelse(EOP2017$B03 == 99, NA, 0)))
+table(EOP2017$progress)
+table(EOP2017$stagnant)
+table(EOP2017$decline)
+
+
+## Country Future
+table(EOP2017$B04)
+EOP2017 <- EOP2017%>%
+  mutate(better = ifelse(EOP2017$B04 == 1, 1,
+                         ifelse(EOP2017$B04 == 99, NA, 0)))
+EOP2017 <- EOP2017%>%
+  mutate(equal = ifelse(EOP2017$B04 == 2, 1,
+                        ifelse(EOP2017$B04 == 99, NA, 0)))
+EOP2017 <- EOP2017%>%
+  mutate(worse = ifelse(EOP2017$B04 == 3, 1,
+                        ifelse(EOP2017$B04 == 99, NA, 0)))
+table(EOP2017$better)
+table(EOP2017$equal)
+table(EOP2017$worse)
+
+## Quality of life
+
+table(EOP2017$B09_T1)
+table(EOP2017$B09_T2)
+EOP2017$mebetter <- ifelse(EOP2017$B09_T1 == 99, NA, EOP2017$B09_T1)
+EOP2017$childrenbetter <- ifelse(EOP2017$B09_T2 == 99, NA, EOP2017$B09_T2)
+table(EOP2017$mebetter)
+table(EOP2017$childrenbetter)
+
+
+######## 2017 - POLITICAL ENGAGEMENT ########
+
+## Trust
+#lapply(EOP2018 %>% select(starts_with("D2_")), table)
+
+#EOP2018 <- EOP2018 %>%
+#  mutate(across(starts_with("D2_"), 
+#                ~ ifelse(.x == 99, NA, .x), 
+#                .names = "trust{str_remove(.col, 'D2_')}"))
+
+#lapply(EOP2018 %>% select(starts_with("trust")), table)
+
+## Corruption 
+
+#lapply(EOP2018 %>% select(starts_with("D5_")), table)
+
+#EOP2018 <- EOP2018 %>%
+#  mutate(across(starts_with("D5_"), 
+#                ~ ifelse(.x == 99, NA, .x), 
+#                .names = "corruption{str_remove(.col, 'D5_')}"))
+
+#lapply(EOP2018 %>% select(starts_with("corruption")), table)
+
+# recoding, so 5 is more corrupted
+
+#EOP2018 <- EOP2018 %>%
+#  mutate(across(starts_with("corruption"), ~ 6 - .x))
+#lapply(EOP2018 %>% select(starts_with("corruption")), table)
+
+
+## Rational Approval of Demcoracy
+
+table(EOP2017$C12)
+EOP2017 <- EOP2017%>%
+  mutate(democracy = ifelse(EOP2017$C12 == 1, 1,
+                            ifelse(EOP2017$C12 == 99, NA, 0)))
+EOP2017 <- EOP2017%>%
+  mutate(authoritarianism = ifelse(EOP2017$C12 == 2, 1,
+                                   ifelse(EOP2017$C12 == 99, NA, 0)))
+EOP2017 <- EOP2017%>%
+  mutate(nocare = ifelse(EOP2017$C12 == 3, 1,
+                         ifelse(EOP2017$C12 == 99, NA, 0)))
+
+
+table(EOP2017$democracy)
+table(EOP2017$authoritarianism)
+table(EOP2017$nocare)
+
+## Satisfaction with democracy
+
+table(EOP2017$B05)
+EOP2017$satisdemoc <- ifelse(EOP2017$B05 == 99, NA, EOP2017$B05)
+table(EOP2017$satisdemoc)
+
+# recoding
+
+EOP2017 <- EOP2017 %>%
+  mutate(satisdemoc = case_when(
+    satisdemoc == 1 ~ 4,
+    satisdemoc == 2 ~ 3,
+    satisdemoc == 3 ~ 2,
+    satisdemoc == 4 ~ 1,
+    TRUE ~ satisdemoc  # This line keeps all other values as they are
+  ))
+
+table(EOP2017$satisdemoc)
+
+
+## Internal Efficacy (NAs)
+
+table(EOP2017$E06_T1)
+table(EOP2017$E06_T2)
+table(EOP2017$E06_T3)
+table(EOP2017$E06_T4)
+table(EOP2017$E06_T5)
+
+EOP2017$intef1 <- ifelse(EOP2017$E06_T1 == 99, NA, EOP2017$E06_T1)
+table(EOP2017$intef1)
+
+EOP2017$intef2 <- ifelse(EOP2017$E06_T2 == 99, NA, EOP2017$E06_T2)
+table(EOP2017$intef2)
+
+EOP2017$intef3 <- ifelse(EOP2017$E06_T3 == 99, NA, EOP2017$E06_T3)
+table(EOP2017$intef3)
+
+EOP2017$intef4 <- ifelse(EOP2017$E06_T4 == 99, NA, EOP2017$E06_T4)
+table(EOP2017$intef4)
+
+EOP2017$intef5 <- ifelse(EOP2017$E06_T5 == 99, NA, EOP2017$E06_T5)
+table(EOP2017$intef5)
+
+## External Efficacy (NAs)
+
+table(EOP2017$E07_T1)
+table(EOP2017$E07_T2)
+table(EOP2017$E07_T3)
+table(EOP2017$E07_T4)
+
+EOP2017$extef1 <- ifelse(EOP2017$E07_T1 == 99, NA, EOP2017$E07_T1)
+table(EOP2017$extef1)
+
+EOP2017$extef2 <- ifelse(EOP2017$E07_T2 == 99, NA, EOP2017$E07_T2)
+table(EOP2017$extef2)
+
+EOP2017$extef3 <- ifelse(EOP2017$E07_T3 == 99, NA, EOP2017$E07_T3)
+table(EOP2017$extef3)
+
+EOP2017$extef4 <- ifelse(EOP2017$E07_T4 == 99, NA, EOP2017$E07_T4)
+table(EOP2017$extef4)
+
+# To recode efficacies (intef1, intef3, extef1, extef3, extef4)
+EOP2017 <- EOP2017 %>%
+  mutate(across(c(intef1, intef3, extef1, extef3, extef4), ~ 6 - .x))
+
+table(EOP2017$extef4)
+
+
+
+## Political Interest
+
+table(EOP2017$E03_T1)
+table(EOP2017$E03_T2)
+table(EOP2017$E03_T3)
+table(EOP2017$E03_T4)
+table(EOP2017$E03_T5)
+
+EOP2017$polint1 <- ifelse(EOP2017$E03_T1 == 99, NA, EOP2017$E03_T1)
+EOP2017$polint2 <- ifelse(EOP2017$E03_T2 == 99, NA, EOP2017$E03_T2)
+EOP2017$polint3 <- ifelse(EOP2017$E03_T3 == 99, NA, EOP2017$E03_T3)
+EOP2017$polint4 <- ifelse(EOP2017$E03_T4 == 99, NA, EOP2017$E03_T4)
+EOP2017$polint5 <- ifelse(EOP2017$E03_T5 == 99, NA, EOP2017$E03_T5)
+
+table(EOP2017$polint1)
+table(EOP2017$polint2)
+table(EOP2017$polint3)
+table(EOP2017$polint4)
+table(EOP2017$polint5)
+
+
+
+## Ideology
+
+table(EOP2017$Z07)
+
+EOP2017$righ <- NULL
+
+EOP2017$right <- ifelse(EOP2017$Z07 == 1 | EOP2017$Z07 == 2, 1 , 0)
+EOP2017$center <- ifelse(EOP2017$Z07 == 3, 1 , 0)
+EOP2017$left <- ifelse(EOP2017$Z07 == 4 | EOP2017$Z07 == 5, 1 , 0)
+
+table(EOP2017$right)
+table(EOP2017$left)
+table(EOP2017$center)
+
+
+## Participation
+
+table(EOP2017$E15_T1)
+table(EOP2017$E15_T2)
+table(EOP2017$E15_T3)
+table(EOP2017$E15_T4)
+table(EOP2017$E15_T5)
+table(EOP2017$E15_T6)
+table(EOP2017$E15_T7)
+table(EOP2017$E15_T8)
+table(EOP2017$E15_T9)
+table(EOP2017$E15_T10)
+table(EOP2017$E15_T11)
+table(EOP2017$E15_T12)
+
+EOP2017 <- EOP2017 %>%
+  mutate(across(starts_with("E15_T"), 
+                ~ ifelse(.x == 99, NA, ifelse(.x == 1, 1, 0)), 
+                .names = "part{str_remove(.col, 'E15_T')}"))
+
+EOP2017$participation <- EOP2017$part1 + EOP2017$part2 + EOP2017$part3 + EOP2017$part4 + EOP2017$part5 + EOP2017$part6 + EOP2017$part7 + EOP2017$part8 + EOP2017$part9 + EOP2017$part10 + EOP2017$part11 + EOP2017$part12
+summary(EOP2017$participation)
+
+## Last year participation
+
+table(EOP2017$E16_T1)
+table(EOP2017$E16_T2)
+table(EOP2017$E16_T3)
+table(EOP2017$E16_T4)
+table(EOP2017$E16_T5)
+table(EOP2017$E16_T6)
+table(EOP2017$E16_T7)
+table(EOP2017$E16_T8)
+table(EOP2017$E16_T9)
+table(EOP2017$E16_T10)
+table(EOP2017$E16_T11)
+table(EOP2017$E16_T12)
+
+EOP2017 <- EOP2017 %>%
+  mutate(across(starts_with("E16_T"), 
+                ~ ifelse(.x == 99, NA, ifelse(.x == 1, 1, 0)), 
+                .names = "lyearpart{str_remove(.col, 'E16_T')}"))
+
+EOP2017$lyearpart <- EOP2017$lyearpart1 + EOP2017$lyearpart2 + EOP2017$lyearpart3 + EOP2017$lyearpart4 + EOP2017$lyearpart5 + EOP2017$lyearpart6 + EOP2017$lyearpart7 + EOP2017$lyearpart8 + EOP2017$lyearpart9 + EOP2017$lyearpart10 + EOP2017$lyearpart11 + EOP2017$lyearpart12
+summary(EOP2017$lyearpart)
+table(EOP2017$lyearpart)
+
+# Ideational Cleavage
+
+table(EOP2017$C11_T1)
+table(EOP2017$C11_T2)
+table(EOP2017$C11_T3)
+table(EOP2017$C11_T4)
+table(EOP2017$C11_T5)
+table(EOP2017$C11_T6)
+
+EOP2017$idea1 <- EOP2017$C11_T1
+EOP2017$idea2 <- EOP2017$C11_T2
+EOP2017$idea3 <- EOP2017$C11_T3
+EOP2017$idea4 <- EOP2017$C11_T4
+EOP2017$idea5 <- EOP2017$C11_T5
+EOP2017$idea6 <- EOP2017$C11_T6
+
+
+# Social Media Use
+
+table(EOP2017$E02_T1)
+table(EOP2017$E02_T2)
+table(EOP2017$E02_T3)
+table(EOP2017$E02_T4)
+table(EOP2017$E02_T5)
+table(EOP2017$E02_T6)
+table(EOP2017$E02_T7)
+
+
+EOP2017 <- EOP2017 %>%
+  mutate(across(starts_with("E02_T"), 
+                ~ ifelse(.x == 99, NA, .x), 
+                .names = "use{str_remove(.col, 'E02_T')}"))
+
+lapply(EOP2017 %>% select(starts_with("use")), table)
+
+
+
+
+
+#**************************************************************************************************************************/
 ##########  EOP 2018  ##########################################################
 #**************************************************************************************************************************/
 
@@ -75,6 +469,22 @@ table(EOP2018$education)
 EOP2018$householdeduc <- ifelse(EOP2018$Z3 == 99, NA, EOP2018$Z3)
 table(EOP2018$Z3)  
 table(EOP2018$householdeduc)
+
+# Comunas
+
+EOP2018 <- EOP2018 %>%
+  mutate(
+    com1 = ifelse(S1 == 1, 1, 0),
+    com2 = ifelse(S1 == 2, 1, 0),
+    com3 = ifelse(S1 == 3, 1, 0),
+    com4 = ifelse(S1 == 4, 1, 0),
+    com5 = ifelse(S1 == 5, 1, 0),
+    com6 = ifelse(S1 == 6, 1, 0),
+    com7 = ifelse(S1 == 7, 1, 0),
+    com8 = ifelse(S1 == 8, 1, 0),
+    com9 = ifelse(S1 == 9, 1, 0),
+    com10 = ifelse(S1 == 10, 1, 0)
+  )
 
 # Living in the periphery
 
@@ -214,6 +624,21 @@ table(EOP2018$nocare)
 table(EOP2018$B6)
 EOP2018$satisdemoc <- ifelse(EOP2018$B6 == 99, NA, EOP2018$B6)
 table(EOP2018$satisdemoc)
+
+# recoding
+
+EOP2018 <- EOP2018 %>%
+  mutate(satisdemoc = case_when(
+    satisdemoc == 1 ~ 4,
+    satisdemoc == 2 ~ 3,
+    satisdemoc == 3 ~ 2,
+    satisdemoc == 4 ~ 1,
+    TRUE ~ satisdemoc  # This line keeps all other values as they are
+  ))
+
+table(EOP2018$satisdemoc)
+
+
 
 ## Internal Efficacy (NAs)
 
@@ -538,6 +963,24 @@ EOP2019$householdeduc <- ifelse(EOP2019$Z4 == 11, NA, EOP2019$Z4)
 table(EOP2019$Z4)  
 table(EOP2019$householdeduc)
 
+
+# Comunas
+
+EOP2019 <- EOP2019 %>%
+  mutate(
+    com1 = ifelse(S1 == 1, 1, 0),
+    com2 = ifelse(S1 == 2, 1, 0),
+    com3 = ifelse(S1 == 3, 1, 0),
+    com4 = ifelse(S1 == 4, 1, 0),
+    com5 = ifelse(S1 == 5, 1, 0),
+    com6 = ifelse(S1 == 6, 1, 0),
+    com7 = ifelse(S1 == 7, 1, 0),
+    com8 = ifelse(S1 == 8, 1, 0),
+    com9 = ifelse(S1 == 9, 1, 0),
+    com10 = ifelse(S1 == 10, 1, 0)
+  )
+
+
 # Living in the periphery
 
 EOP2019$periphery <- ifelse(EOP2019$S1 == 1 | EOP2019$S1 == 2 | EOP2019$S1 == 3 | EOP2019$S1 == 4 | EOP2019$S1 == 5 | EOP2019$S1 == 9 | EOP2019$S1 == 10, 1, 0)
@@ -681,6 +1124,20 @@ table (EOP2019$nocare)
 table(EOP2019$B6)
 EOP2019$satisdemoc <- ifelse(EOP2019$B6 == 99, NA, EOP2019$B6)
 table(EOP2019$satisdemoc)
+
+# recoding
+
+EOP2019 <- EOP2019 %>%
+  mutate(satisdemoc = case_when(
+    satisdemoc == 1 ~ 4,
+    satisdemoc == 2 ~ 3,
+    satisdemoc == 3 ~ 2,
+    satisdemoc == 4 ~ 1,
+    TRUE ~ satisdemoc  # This line keeps all other values as they are
+  ))
+
+table(EOP2019$satisdemoc)
+
 
 ## Internal Efficacy (NAs)
 
@@ -966,6 +1423,22 @@ EOP2020$householdeduc <- ifelse(EOP2020$Z4 == 99, NA, EOP2020$Z4)
 table(EOP2020$Z4)  
 table(EOP2020$householdeduc)
 
+# Comunas
+
+EOP2020 <- EOP2020 %>%
+  mutate(
+    com1 = ifelse(S1 == 1, 1, 0),
+    com2 = ifelse(S1 == 2, 1, 0),
+    com3 = ifelse(S1 == 3, 1, 0),
+    com4 = ifelse(S1 == 4, 1, 0),
+    com5 = ifelse(S1 == 5, 1, 0),
+    com6 = ifelse(S1 == 6, 1, 0),
+    com7 = ifelse(S1 == 7, 1, 0),
+    com8 = ifelse(S1 == 8, 1, 0),
+    com9 = ifelse(S1 == 9, 1, 0),
+    com10 = ifelse(S1 == 10, 1, 0)
+  )
+
 # Living in the periphery
 
 EOP2020$periphery <- ifelse(EOP2020$S1 == 1 | EOP2020$S1 == 2 | EOP2020$S1 == 3 | EOP2020$S1 == 4 | EOP2020$S1 == 5 | EOP2020$S1 == 9 | EOP2020$S1 == 10, 1, 0)
@@ -1109,6 +1582,20 @@ table(EOP2020$nocare)
 table(EOP2020$B6)
 EOP2020$satisdemoc <- ifelse(EOP2020$B6 == 99, NA, EOP2020$B6)
 table(EOP2020$satisdemoc)
+
+# recoding
+
+EOP2020 <- EOP2020 %>%
+  mutate(satisdemoc = case_when(
+    satisdemoc == 1 ~ 4,
+    satisdemoc == 2 ~ 3,
+    satisdemoc == 3 ~ 2,
+    satisdemoc == 4 ~ 1,
+    TRUE ~ satisdemoc  # This line keeps all other values as they are
+  ))
+
+table(EOP2020$satisdemoc)
+
 
 ## Internal Efficacy (NAs)
 
@@ -1395,6 +1882,22 @@ EOP2021$householdeduc <- ifelse(EOP2021$Z4 == 11, NA, EOP2021$Z4)
 table(EOP2021$Z4)  
 table(EOP2021$householdeduc)
 
+# Comunas
+
+EOP2021 <- EOP2021 %>%
+  mutate(
+    com1 = ifelse(S1 == 1, 1, 0),
+    com2 = ifelse(S1 == 2, 1, 0),
+    com3 = ifelse(S1 == 3, 1, 0),
+    com4 = ifelse(S1 == 4, 1, 0),
+    com5 = ifelse(S1 == 5, 1, 0),
+    com6 = ifelse(S1 == 6, 1, 0),
+    com7 = ifelse(S1 == 7, 1, 0),
+    com8 = ifelse(S1 == 8, 1, 0),
+    com9 = ifelse(S1 == 9, 1, 0),
+    com10 = ifelse(S1 == 10, 1, 0)
+  )
+
 # Living in the periphery
 
 EOP2021$periphery <- ifelse(EOP2021$S1 == 1 | EOP2021$S1 == 2 | EOP2021$S1 == 3 | EOP2021$S1 == 4 | EOP2021$S1 == 5 | EOP2021$S1 == 9 | EOP2021$S1 == 10, 1, 0)
@@ -1538,6 +2041,22 @@ table(EOP2021$nocare)
 table(EOP2021$B6)
 EOP2021$satisdemoc <- ifelse(EOP2021$B6 == 99, NA, EOP2021$B6)
 table(EOP2021$satisdemoc)
+
+# recoding
+
+EOP2021 <- EOP2021 %>%
+  mutate(satisdemoc = case_when(
+    satisdemoc == 1 ~ 4,
+    satisdemoc == 2 ~ 3,
+    satisdemoc == 3 ~ 2,
+    satisdemoc == 4 ~ 1,
+    TRUE ~ satisdemoc  # This line keeps all other values as they are
+  ))
+
+table(EOP2021$satisdemoc)
+
+
+
 
 ## Internal Efficacy (NAs)
 
@@ -1823,6 +2342,22 @@ EOP2022$householdeduc <- ifelse(EOP2022$Z4 == 11, NA, EOP2022$Z4)
 table(EOP2022$Z4)  
 table(EOP2022$householdeduc)
 
+# Comunas
+
+EOP2022 <- EOP2022 %>%
+  mutate(
+    com1 = ifelse(S1 == 1, 1, 0),
+    com2 = ifelse(S1 == 2, 1, 0),
+    com3 = ifelse(S1 == 3, 1, 0),
+    com4 = ifelse(S1 == 4, 1, 0),
+    com5 = ifelse(S1 == 5, 1, 0),
+    com6 = ifelse(S1 == 6, 1, 0),
+    com7 = ifelse(S1 == 7, 1, 0),
+    com8 = ifelse(S1 == 8, 1, 0),
+    com9 = ifelse(S1 == 9, 1, 0),
+    com10 = ifelse(S1 == 10, 1, 0)
+  )
+
 # Living in the periphery
 
 EOP2022$periphery <- ifelse(EOP2022$S1 == 1 | EOP2022$S1 == 2 | EOP2022$S1 == 3 | EOP2022$S1 == 4 | EOP2022$S1 == 5 | EOP2022$S1 == 9 | EOP2022$S1 == 10, 1, 0)
@@ -1966,6 +2501,20 @@ table(EOP2022$nocare)
 table(EOP2022$B6)
 EOP2022$satisdemoc <- ifelse(EOP2022$B6 == 99, NA, EOP2022$B6)
 table(EOP2022$satisdemoc)
+
+# recoding
+
+EOP2022 <- EOP2022 %>%
+  mutate(satisdemoc = case_when(
+    satisdemoc == 1 ~ 4,
+    satisdemoc == 2 ~ 3,
+    satisdemoc == 3 ~ 2,
+    satisdemoc == 4 ~ 1,
+    TRUE ~ satisdemoc  # This line keeps all other values as they are
+  ))
+
+table(EOP2022$satisdemoc)
+
 
 ## Internal Efficacy (NAs)
 
@@ -2226,7 +2775,7 @@ summary(EOP2023$age)
 
 ## Socioeconomic Status (1 highest)
 
-EOP2023$SES <- ifelse(EOP2023$GSE == 99, NA, EOP2022$GSEX)
+EOP2023$SES <- ifelse(EOP2023$GSE == 99, NA, EOP2023$GSE)
 table(EOP2023$GSE)
 
 EOP2023 <- EOP2023%>%
@@ -2264,6 +2813,22 @@ EOP2023 <- EOP2023%>%
                             ifelse(Z3 == 99, NA, Z3)))
 table(EOP2023$Z3)  
 table(EOP2023$householdeduc)
+
+# Comunas
+
+EOP2023 <- EOP2023 %>%
+  mutate(
+    com1 = ifelse(s1 == 1, 1, 0),
+    com2 = ifelse(s1 == 2, 1, 0),
+    com3 = ifelse(s1 == 3, 1, 0),
+    com4 = ifelse(s1 == 4, 1, 0),
+    com5 = ifelse(s1 == 5, 1, 0),
+    com6 = ifelse(s1 == 6, 1, 0),
+    com7 = ifelse(s1 == 7, 1, 0),
+    com8 = ifelse(s1 == 8, 1, 0),
+    com9 = ifelse(s1 == 9, 1, 0),
+    com10 = ifelse(s1 == 10, 1, 0)
+  )
 
 # Living in the periphery
 
@@ -2415,6 +2980,20 @@ table(EOP2023$nocare)
 table(EOP2023$B6)
 EOP2023$satisdemoc <- ifelse(EOP2023$B6 == 88 | EOP2023$B6 == 99, NA, EOP2023$B6)
 table(EOP2023$satisdemoc)
+
+# recoding
+
+EOP2023 <- EOP2023 %>%
+  mutate(satisdemoc = case_when(
+    satisdemoc == 1 ~ 4,
+    satisdemoc == 2 ~ 3,
+    satisdemoc == 3 ~ 2,
+    satisdemoc == 4 ~ 1,
+    TRUE ~ satisdemoc  # This line keeps all other values as they are
+  ))
+
+table(EOP2023$satisdemoc)
+
 
 ## Internal Efficacy (NAs)
 
@@ -2622,6 +3201,464 @@ lapply(EOP2023 %>% select(starts_with("use")), table)
 
 
 #**************************************************************************************************************************/
+##########  EOP 2024  ##########################################################
+#**************************************************************************************************************************/
+
+#Import Data
+
+EOP2024 <- read_sav("EOP2024.sav")
+View(EOP2024)
+
+# Year
+EOP2024$year <- 2024
+
+# Weight
+
+EOP2024$weight <- EOP2024$ponderador
+
+######## 2024 - SOCIODEMOGRAPHIC VARIABLES ########
+
+# Sex (NAs and create dummy =1 if women)
+
+EOP2024 <- EOP2024%>%
+  mutate(sex = ifelse(A7 == 2, 1,
+                      ifelse(A7 == 1, 0, NA)))
+table(EOP2024$A7)
+table(EOP2024$sex)
+
+# Age
+
+EOP2024$age <- EOP2024$A6
+summary(EOP2024$A6)
+summary(EOP2024$age)
+
+## Socioeconomic Status (1 highest)
+
+EOP2024$SES <- ifelse(EOP2024$GSE == 99, NA, EOP2024$GSE)
+table(EOP2024$GSE)
+
+EOP2024 <- EOP2024%>%
+  mutate(SES = ifelse(GSE == 1 | GSE == 2 | GSE ==3, 1,
+                      ifelse(GSE == 4, 2,
+                             ifelse(GSE == 5, 3, 
+                                    ifelse(GSE == 6, 4,
+                                           ifelse(GSE == 7, 5, NA))))))
+table(EOP2024$SES)
+
+# recoding
+
+EOP2024 <- EOP2024 %>%
+  mutate(SES = case_when(
+    SES == 1 ~ 5,
+    SES == 2 ~ 4,
+    SES == 4 ~ 2,
+    SES == 5 ~ 1,
+    TRUE ~ SES  # This line keeps all other values as they are
+  ))
+
+table(EOP2024$SES)
+
+
+# Education (NAs)
+
+EOP2024 <- EOP2024%>%
+  mutate(education = ifelse(Z2 == 99, NA, Z2))
+
+table(EOP2024$Z2)
+table(EOP2024$education)
+
+
+EOP2024 <- EOP2024%>%
+  mutate(householdeduc = ifelse(Z3 == 88, NA,
+                                ifelse(Z3 == 99, NA, Z3)))
+table(EOP2024$Z3)  
+table(EOP2024$householdeduc)
+
+# Comunas
+
+EOP2024 <- EOP2024 %>%
+  mutate(
+    com1 = ifelse(S1 == 1, 1, 0),
+    com2 = ifelse(S1 == 2, 1, 0),
+    com3 = ifelse(S1 == 3, 1, 0),
+    com4 = ifelse(S1 == 4, 1, 0),
+    com5 = ifelse(S1 == 5, 1, 0),
+    com6 = ifelse(S1 == 6, 1, 0),
+    com7 = ifelse(S1 == 7, 1, 0),
+    com8 = ifelse(S1 == 8, 1, 0),
+    com9 = ifelse(S1 == 9, 1, 0),
+    com10 = ifelse(S1 == 10, 1, 0)
+  )
+
+# Living in the periphery
+
+EOP2024$periphery <- ifelse(EOP2024$S1 == 1 | EOP2024$S1 == 2 | EOP2024$S1 == 3 | EOP2024$S1 == 4 | EOP2024$S1 == 5 | EOP2024$S1 == 9 | EOP2024$S1 == 10, 1, 0)
+table(EOP2024$periphery)
+table(EOP2024$S1)
+
+# Internet Access
+
+table(EOP2024$T_Z9_1)
+table(EOP2024$T_Z9_2)
+table(EOP2024$T_Z9_3)
+
+EOP2024 <- EOP2024%>%
+  mutate(inthome = ifelse(T_Z9_1 == 1, 1,
+                          ifelse(T_Z9_1 == 2, 0, NA)))
+EOP2024 <- EOP2024%>%
+  mutate(intmobile = ifelse(T_Z9_2 == 1, 1,
+                            ifelse(T_Z9_2 == 2, 0, NA)))
+EOP2024 <- EOP2024%>%
+  mutate(intwork = ifelse(T_Z9_3 == 1, 1,
+                          ifelse(T_Z9_3 == 2, 0, NA)))
+
+table(EOP2024$inthome)
+table(EOP2024$intmobile)
+table(EOP2024$intwork)
+
+######## 2024 - EVALUATION OF AUTHORITIES ########
+
+## Presidential Approval
+
+table(EOP2024$B1)
+EOP2024 <- EOP2024%>%
+  mutate(presapp = ifelse(EOP2024$B1 == 1, 1,
+                          ifelse(EOP2024$B1 == 88 | EOP2024$B1 == 99 , NA, 0)))
+table(EOP2024$presapp)
+
+## Government Approval
+
+table(EOP2024$B2)
+EOP2024 <- EOP2024%>%
+  mutate(govapp = ifelse(EOP2024$B2 == 1, 1,
+                         ifelse(EOP2024$B2 == 88 | EOP2024$B2 == 99, NA, 0)))
+table (EOP2024$govapp)
+
+## Country Present
+
+table(EOP2024$B3)
+EOP2024 <- EOP2024%>%
+  mutate(progress = ifelse(EOP2024$B3 == 1, 1,
+                           ifelse(EOP2024$B3 == 88 | EOP2024$B3 == 99, NA, 0)))
+EOP2024 <- EOP2024%>%
+  mutate(stagnant = ifelse(EOP2024$B3 == 2, 1,
+                           ifelse(EOP2024$B3 == 88 | EOP2024$B3 == 99, NA, 0)))
+EOP2024 <- EOP2024%>%
+  mutate(decline = ifelse(EOP2024$B3 == 3, 1,
+                          ifelse(EOP2024$B3 == 88 | EOP2024$B3 == 99, NA, 0)))
+
+table(EOP2024$progress)
+table(EOP2024$stagnant)
+table(EOP2024$decline)
+
+
+## Country Future
+table(EOP2024$B4)
+EOP2024 <- EOP2024%>%
+  mutate(better = ifelse(EOP2024$B4 == 1, 1,
+                         ifelse(EOP2024$B4 == 88 | EOP2024$B4 == 99, NA, 0)))
+EOP2024 <- EOP2024%>%
+  mutate(equal = ifelse(EOP2024$B4 == 2, 1,
+                        ifelse(EOP2024$B4 == 88 | EOP2024$B4 == 99, NA, 0)))
+EOP2024 <- EOP2024%>%
+  mutate(worse = ifelse(EOP2024$B4 == 3, 1,
+                        ifelse(EOP2024$B4 == 88 | EOP2024$B4 == 99, NA, 0)))
+table(EOP2024$better)
+table(EOP2024$equal)
+table(EOP2024$worse)
+
+## Quality of life
+
+table(EOP2024$T_B7_1)
+table(EOP2024$T_B7_2)
+
+EOP2024 <- EOP2024%>%
+  mutate(mebetter = ifelse(T_B7_1 == 88, NA,
+                           ifelse(T_B7_1 == 99, NA, T_B7_1)))
+EOP2024 <- EOP2024%>%
+  mutate(childrenbetter = ifelse(T_B7_2 == 88, NA,
+                                 ifelse(T_B7_2 == 99, NA, T_B7_2)))
+
+
+table(EOP2024$mebetter)
+table(EOP2024$childrenbetter)
+
+######## 2024 - POLITICAL ENGAGEMENT ########
+
+## Trust
+lapply(EOP2024 %>% select(starts_with("T_D2_")), table)
+
+EOP2024 <- EOP2024 %>%
+  mutate(across(starts_with("T_D2_"), 
+                ~ ifelse(.x == 88 | .x == 99, NA, .x), 
+                .names = "trust{str_remove(.col, 'T_D2_')}"))
+
+# Trust in Media was not considered before
+EOP2024$trust18 <- NULL
+
+lapply(EOP2024 %>% select(starts_with("trust")), table)
+
+## Corruption 
+
+lapply(EOP2024 %>% select(starts_with("T_D6_")), table)
+
+EOP2024 <- EOP2024 %>%
+  mutate(across(starts_with("T_D6_"), 
+                ~ ifelse(.x == 88 | .x == 99, NA, .x), 
+                .names = "corruption{str_remove(.col, 'T_D6_')}"))
+
+lapply(EOP2024 %>% select(starts_with("corruption")), table)
+
+# recoding, so 5 is more corrupted
+
+EOP2024 <- EOP2024 %>%
+  mutate(across(starts_with("corruption"), ~ 6 - .x))
+lapply(EOP2024 %>% select(starts_with("corruption")), table)
+
+
+
+## Rational Approval of Demcoracy
+
+table(EOP2024$B5)
+
+EOP2024 <- EOP2024%>%
+  mutate(democracy = ifelse(EOP2024$B5 == 1, 1,
+                            ifelse(EOP2024$B5 == 88 | EOP2024$B5 == 99, NA, 0)))
+EOP2024 <- EOP2024%>%
+  mutate(authoritarianism = ifelse(EOP2024$B5 == 2, 1,
+                                   ifelse(EOP2024$B5 == 88 | EOP2024$B5 == 99, NA, 0)))
+EOP2024 <- EOP2024%>%
+  mutate(nocare = ifelse(EOP2024$B5 == 3, 1,
+                         ifelse(EOP2024$B5 == 88 | EOP2024$B5 == 99, NA, 0)))
+
+table(EOP2024$democracy)
+table(EOP2024$authoritarianism)
+table(EOP2024$nocare)
+
+## Satisfaction with democracy
+
+table(EOP2024$B6)
+EOP2024$satisdemoc <- ifelse(EOP2024$B6 == 88 | EOP2024$B6 == 99, NA, EOP2024$B6)
+table(EOP2024$satisdemoc)
+
+# recoding
+
+EOP2024 <- EOP2024 %>%
+  mutate(satisdemoc = case_when(
+    satisdemoc == 1 ~ 4,
+    satisdemoc == 2 ~ 3,
+    satisdemoc == 3 ~ 2,
+    satisdemoc == 4 ~ 1,
+    TRUE ~ satisdemoc  # This line keeps all other values as they are
+  ))
+
+table(EOP2024$satisdemoc)
+
+
+## Internal Efficacy (NAs)
+
+table(EOP2024$T_E2_1)
+table(EOP2024$T_E2_2)
+table(EOP2024$T_E2_3)
+table(EOP2024$T_E2_4)
+table(EOP2024$T_E2_5)
+
+EOP2024$intef1 <- ifelse(EOP2024$T_E2_1 == 88 | EOP2024$T_E2_1 == 99, NA, EOP2024$T_E2_1)
+table(EOP2024$intef1)
+
+EOP2024$intef2 <- ifelse(EOP2024$T_E2_2 == 88 | EOP2024$T_E2_2 == 99, NA, EOP2024$T_E2_2)
+table(EOP2024$intef2)
+
+EOP2024$intef3 <- ifelse(EOP2024$T_E2_3 == 88 | EOP2024$T_E2_3 == 99, NA, EOP2024$T_E2_3)
+table(EOP2024$intef3)
+
+EOP2024$intef4 <- ifelse(EOP2024$T_E2_4 == 88 | EOP2024$T_E2_4 == 99, NA, EOP2024$T_E2_4)
+table(EOP2024$intef4)
+
+EOP2024$intef5 <- ifelse(EOP2024$T_E2_5 == 88 | EOP2024$T_E2_5 == 99, NA, EOP2024$T_E2_5)
+table(EOP2024$intef5)
+
+## External Efficacy (NAs)
+
+table(EOP2024$T_E3_1)
+table(EOP2024$T_E3_2)
+table(EOP2024$T_E3_3)
+table(EOP2024$T_E3_4)
+
+EOP2024$extef1 <- ifelse(EOP2024$T_E3_1 == 88 | EOP2024$T_E3_1 == 99, NA, EOP2024$T_E3_1)
+table(EOP2024$extef1)
+
+EOP2024$extef2 <- ifelse(EOP2024$T_E3_2 == 88 | EOP2024$T_E3_2 == 99, NA, EOP2024$T_E3_2)
+table(EOP2024$extef2)
+
+EOP2024$extef3 <- ifelse(EOP2024$T_E3_3 == 88 | EOP2024$T_E3_3 == 99, NA, EOP2024$T_E3_3)
+table(EOP2024$extef3)
+
+EOP2024$extef4 <- ifelse(EOP2024$T_E3_4 == 88 | EOP2024$T_E3_4 == 99, NA, EOP2024$T_E3_4)
+table(EOP2024$extef4)
+
+# To recode efficacies (intef1, intef3, extef1, extef3, extef4)
+EOP2024 <- EOP2024 %>%
+  mutate(across(c(intef1, intef3, extef1, extef3, extef4), ~ 6 - .x))
+
+table(EOP2024$extef4)
+
+
+## Online Political Efficacy
+
+table(EOP2024$T_G3_1)
+table(EOP2024$T_G3_2)
+table(EOP2024$T_G3_3)
+table(EOP2024$T_G3_4)
+
+EOP2024$ope1 <- ifelse(EOP2024$T_G3_1 == 88 | EOP2024$T_G3_1 == 99, NA, EOP2024$T_G3_1)
+EOP2024$ope2 <- ifelse(EOP2024$T_G3_2 == 88 | EOP2024$T_G3_2 == 99, NA, EOP2024$T_G3_2)
+EOP2024$ope3 <- ifelse(EOP2024$T_G3_3 == 88 | EOP2024$T_G3_3 == 99, NA, EOP2024$T_G3_3)
+EOP2024$ope4 <- ifelse(EOP2024$T_G3_4 == 88 | EOP2024$T_G3_4 == 99, NA, EOP2024$T_G3_4)
+
+table(EOP2024$ope1)
+table(EOP2024$ope2)
+table(EOP2024$ope3)
+table(EOP2024$ope4)
+
+
+## Political Interest
+
+table(EOP2024$T_E1_1)
+table(EOP2024$T_E1_2)
+table(EOP2024$T_E1_3)
+table(EOP2024$T_E1_4)
+table(EOP2024$T_E1_5)
+
+EOP2024$polint1 <- ifelse(EOP2024$T_E1_1 == 88 | EOP2024$T_E1_1 == 99, NA, EOP2024$T_E1_1)
+EOP2024$polint2 <- ifelse(EOP2024$T_E1_2 == 88 | EOP2024$T_E1_2 == 99, NA, EOP2024$T_E1_2)
+EOP2024$polint3 <- ifelse(EOP2024$T_E1_3 == 88 | EOP2024$T_E1_3 == 99, NA, EOP2024$T_E1_3)
+EOP2024$polint4 <- ifelse(EOP2024$T_E1_4 == 88 | EOP2024$T_E1_4 == 99, NA, EOP2024$T_E1_4)
+EOP2024$polint5 <- ifelse(EOP2024$T_E1_5 == 88 | EOP2024$T_E1_5 == 99, NA, EOP2024$T_E1_5)
+
+table(EOP2024$polint1)
+table(EOP2024$polint2)
+table(EOP2024$polint3)
+table(EOP2024$polint4)
+table(EOP2024$polint5)
+
+
+## Political Knowledge
+
+table(EOP2024$T_B8_33)
+table(EOP2024$T_B8_34)
+table(EOP2024$T_B8_35)
+table(EOP2024$T_B8_36)
+table(EOP2024$T_B8_37)
+table(EOP2024$T_B8_39)
+
+
+EOP2024$know_sen1 <- ifelse(EOP2024$T_B8_33 == 1, 1, 0)
+EOP2024$know_sen2 <- ifelse(EOP2024$T_B8_34 == 1, 1, 0)
+EOP2024$know_sen3 <- ifelse(EOP2024$T_B8_35 == 1, 1, 0)
+EOP2024$know_sen4 <- ifelse(EOP2024$T_B8_36 == 1, 1, 0)
+EOP2024$know_sen5 <- ifelse(EOP2024$T_B8_37 == 1, 1, 0)
+EOP2024$know_int <- ifelse(EOP2024$T_B8_39 == 1, 1, 0)
+
+table(EOP2024$know_sen1)
+table(EOP2024$know_sen2)
+table(EOP2024$know_sen3)
+table(EOP2024$know_sen4)
+table(EOP2024$know_sen5)
+table(EOP2024$know_int)
+
+EOP2024$polknowledge <- EOP2024$know_sen1 + EOP2024$know_sen2 + EOP2024$know_sen3 + EOP2024$know_sen4 + EOP2024$know_sen5 + EOP2024$know_int
+summary(EOP2024$polknowledge)
+
+
+## Ideology
+
+table(EOP2024$F1)
+
+EOP2024$right <- ifelse(EOP2024$F1 == 1 | EOP2024$F1 == 2, 1 , 0)
+EOP2024$center <- ifelse(EOP2024$F1 == 3, 1 , 0)
+EOP2024$left <- ifelse(EOP2024$F1 == 4 | EOP2024$F1 == 5, 1 , 0)
+
+table(EOP2024$right)
+table(EOP2024$left)
+table(EOP2024$center)
+
+
+## Participation
+
+table(EOP2024$T_E6_1)
+table(EOP2024$T_E6_2)
+table(EOP2024$T_E6_3)
+table(EOP2024$T_E6_4)
+table(EOP2024$T_E6_5)
+table(EOP2024$T_E6_6)
+table(EOP2024$T_E6_7)
+table(EOP2024$T_E6_8)
+table(EOP2024$T_E6_9)
+table(EOP2024$T_E6_10)
+table(EOP2024$T_E6_11)
+table(EOP2024$T_E6_12)
+table(EOP2024$T_E6_13)
+table(EOP2024$T_E6_14)
+
+EOP2024 <- EOP2024 %>%
+  mutate(across(starts_with("T_E6_"), 
+                ~ ifelse(.x == 88 | .x == 99, NA, ifelse(.x == 1, 1, 0)), 
+                .names = "part{str_remove(.col, 'T_E6_')}"))
+
+lapply(EOP2024 %>% select(starts_with("part")), table)
+
+# Cacerolazos and cabildos were not considered before
+EOP2024$part13 <- NULL
+EOP2024$part14 <- NULL
+
+EOP2024$participation <- EOP2024$part1 + EOP2024$part2 + EOP2024$part3 + EOP2024$part4 + EOP2024$part5 + EOP2024$part6 + EOP2024$part7 + EOP2024$part8 + EOP2024$part9 + EOP2024$part10 + EOP2024$part11 + EOP2024$part12
+summary(EOP2024$participation)
+
+
+## Ideational Cleavage / In 2019 data there is a problem with this variables, values are 2-6, and not 1-5.
+
+table(EOP2024$C2_1)
+table(EOP2024$C2_2)
+table(EOP2024$C2_3)
+table(EOP2024$C2_4)
+table(EOP2024$C2_5)
+table(EOP2024$C2_6)
+
+EOP2024$idea1 <- EOP2024$C2_1
+EOP2024$idea2 <- EOP2024$C2_2
+EOP2024$idea3 <- EOP2024$C2_3
+EOP2024$idea4 <- EOP2024$C2_4
+EOP2024$idea5 <- EOP2024$C2_5
+EOP2024$idea6 <- EOP2024$C2_6
+
+
+lapply(EOP2024 %>% select(starts_with("idea")), table)
+
+
+## Social Media Use
+
+table(EOP2024$T_G2_1)
+table(EOP2024$T_G2_2)
+table(EOP2024$T_G2_3)
+table(EOP2024$T_G2_4)
+table(EOP2024$T_G2_5)
+table(EOP2024$T_G2_6)
+table(EOP2024$T_G2_7)
+table(EOP2024$T_G2_8)
+table(EOP2024$T_G2_9)
+
+EOP2024 <- EOP2024 %>%
+  mutate(across(starts_with("T_G2_"), 
+                ~ ifelse(.x == 88 | .x == 99 | .x == 8, NA, .x), 
+                .names = "use{str_remove(.col, 'T_G2_')}"))
+
+lapply(EOP2024 %>% select(starts_with("use")), table)
+
+
+
+
+#**************************************************************************************************************************/
 ##########  MERGING  ##########################################################
 #**************************************************************************************************************************/
 
@@ -2629,10 +3666,12 @@ lapply(EOP2023 %>% select(starts_with("use")), table)
 
 # List of columns to keep
 know_cols <- c("sex", "age", "SES", "education", "year", 
-                  "intef1", "intef2", "intef3", "intef4", "intef5", 
+                  "intef1", "intef2", "intef3", "intef4", "intef5",
+                  "extef1", "extef2", "extef3", "extef4",
                   "polint1", "polint2", "polint3", "polint4", "polint5", 
                   "know_sen1", "know_sen2", "know_sen3", "know_sen4", "know_sen5", 
-                  "know_int", "right", "center", "left", "periphery")
+                  "know_int", "right", "center", "left", "com1", "com2", "com3", 
+                  "com4", "com5", "com6", "com7", "com8", "com9", "com10", "periphery")
 
 # Select columns and merge datasets
 know_data <- bind_rows(
@@ -2650,13 +3689,21 @@ write_dta(know_data, "know_data.dta")
 ######### Paper Ideology #########
 
 # List of columns to keep
-ideo_cols <- c("sex", "age", "SES", "education", "year", 
+ideo_cols <- c("sex", "age", "education", "SES", "year", 
                "intef1", "intef2", "intef3", "intef4", "intef5",
                "extef1", "extef2", "extef3", "extef4",
                "polint1", "polint2", "polint3", "polint4", "polint5", 
                "know_sen1", "know_sen2", "know_sen3", "know_sen4", "know_sen5", 
                "know_int", "right", "center", "left", "periphery", "idea1", 
-               "idea2", "idea3", "idea4", "idea5", "idea6", "presapp", "govapp")
+               "idea2", "idea3", "idea4", "idea5", "idea6", "presapp", "govapp",
+               "participation", "better", "equal", "worse", "mebetter", "childrenbetter",
+               "trust1", "trust2", "trust3", "trust4", "trust5", "trust6", "trust7", 
+               "trust8", "trust9", "trust10", "trust11", "trust12", "trust13", "trust14",
+               "trust15", "trust16", "trust17", "satisdemoc", "democracy", "authoritarianism", "nocare",
+               "corruption1", "corruption2", "corruption3", "corruption4", "corruption5",
+               "corruption6", "corruption7", "corruption8", "corruption9", "corruption10",
+               "corruption11", "corruption12", "corruption13", "corruption14", "corruption15",
+               "corruption16", "corruption17")
 
 # Select columns and merge datasets
 ideo_data <- bind_rows(
@@ -2665,8 +3712,92 @@ ideo_data <- bind_rows(
   EOP2020[ideo_cols],
   EOP2021[ideo_cols],
   EOP2022[ideo_cols],
-  EOP2023[ideo_cols]
+  EOP2023[ideo_cols],
+  EOP2024[ideo_cols]
 )
 
 
 write_dta(ideo_data, "ideo_data.dta")
+
+######### Paper Knowledge 2018 RR #########
+
+# List of columns to keep
+know_cols_rr <- c("sex", "age", "SES", "education", "year", 
+               "intef1", "intef2", "intef3", "intef4", "intef5",
+               "extef1", "extef2", "extef3", "extef4",
+               "polint1", "polint2", "polint3", "polint4", "polint5", 
+               "know_sen1", "know_sen2", "know_sen3", "know_sen4", "know_sen5", 
+               "know_int", "right", "center", "left", "com1", "com2", "com3", 
+               "com4", "com5", "com6", "com7", "com8", "com9", "com10", "periphery",
+               "realknow1", "realknow2", "realknow3", "realknow4", "realknow5", "realknow6",
+               "realknow7", "realknow8")
+
+# Select columns and merge datasets
+know_data_2018 <-  EOP2018[know_cols_rr]
+write_dta(know_data_2018, "know_data_2018.dta")
+
+
+
+
+
+
+
+
+
+
+
+######### Book Springer #########
+
+# List of columns to keep
+book_cols <- c("sex", "age", "SES", "education", "year", 
+               "intef1", "intef2", "intef3", "intef4", "intef5",
+               "extef1", "extef2", "extef3", "extef4",
+               "polint1", "polint2", "polint3", "polint4", "polint5", 
+               "know_sen1", "know_sen2", "know_sen3", "know_sen4", "know_sen5", 
+               "know_int", "right", "center", "left", "com1", "com2", "com3", 
+               "com4", "com5", "com6", "com7", "com8", "com9", "com10", "periphery", 
+               "use1", "use2", "use3", "use4", "use5", "use6", "use7", "use8", "use9",
+               "inthome", "intmobile", "intwork", "ope1", "ope2", "ope3", "ope4")
+
+# Select columns and merge datasets
+book_data <- bind_rows(
+  EOP2018[book_cols],
+  EOP2019[book_cols],
+  EOP2020[book_cols],
+  EOP2021[book_cols],
+  EOP2022[book_cols],
+  EOP2023[book_cols]
+)
+
+
+write_dta(book_data, "book_data.dta")
+
+
+
+######### Book Springer 2017 #########
+
+# List of columns to keep
+book2017_cols <- c("sex", "age", "SES", "year", 
+               "intef1", "intef2", "intef3", "intef4", "intef5",
+               "extef1", "extef2", "extef3", "extef4",
+               "polint1", "polint2", "polint3", "polint4", "polint5", 
+               "right", "center", "left", "com1", "com2", "com3", 
+               "com4", "com5", "com6", "com7", "com8", "com9", "com10", "periphery", 
+               "use1", "use2", "use3", "use4", "use5", "use6", "use7",
+               "inthome", "intmobile", "intwork")
+
+# Select columns and merge datasets
+book2017_data <- bind_rows(
+  EOP2017[book2017_cols],
+  EOP2018[book2017_cols],
+  EOP2019[book2017_cols],
+  EOP2020[book2017_cols],
+  EOP2021[book2017_cols],
+  EOP2022[book2017_cols],
+  EOP2023[book2017_cols]
+)
+
+
+write_dta(book2017_data, "book_data_2017.dta")
+
+summary(book2017_data$SES)
